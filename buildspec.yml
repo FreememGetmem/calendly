@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Building Docker image in to Amazon ECR..."
+      - aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 635374934580.dkr.ecr.us-west-1.amazonaws.com 
+      - IMAGE_TAG=latest
+  build:
+    commands:
+      - echo "Building Docker image...."
+      - docker build -platform linux/amd64 -t openweather.
+      - docker tag openweather:latest 635374934580.dkr.ecr.us-west-1.amazonaws.com/openweather:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Pushing Docker image to Amazon ECR..."
+      - docker push 635374934580.dkr.ecr.us-west-1.amazonaws.com/openweather:$IMAGE_TAG
+      - echo "Docker image pushed successfully."
+
+artifacts:
+  files: []
