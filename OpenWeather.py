@@ -24,7 +24,7 @@ s3_client = boto3.client('s3')
 
 # Generate Timestamp for File Naming
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-S3_CALENDLY_PATH = f"{S3_FOLDER_PATH}openweather_{timestamp}.json"
+S3_CALENDLY_PATH = f"{S3_FOLDER_PATH}openweather_{timestamp}.csv"
 
 def get_openweather_api_key():
     """Fetch OpenWeather API key from Secrets Manager."""
@@ -43,16 +43,13 @@ def upload_to_s3(df, s3_path):
         logger.info(f"No data to upload for {s3_path}")
         return
     
-    # json_buffer = StringIO()
-    # df.to_json(json_buffer, index=False)
-    #json_buffer = StringIO()
-    json_string = df.to_json()
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer, index=False)
     
     s3_client.put_object(
         Bucket=S3_BUCKET_NAME,
         Key=s3_path,
-        Body=json_string,
-        ContentType='application/json'
+        Body=csv_buffer.getvalue()
     )
     
     logger.info(f"Uploaded {s3_path} to S3")
